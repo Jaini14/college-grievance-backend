@@ -1879,16 +1879,22 @@ def send_registration_otp(request):
         }
     )
 
-    send_mail(
-        "College Registration OTP",
-        f"Your OTP is: {otp}",
-        settings.EMAIL_HOST_USER,
-        [email],
-        fail_silently=False
+    # send_mail(
+    #     "College Registration OTP",
+    #     f"Your OTP is: {otp}",
+    #     settings.EMAIL_HOST_USER,
+    #     [email],
+    #     fail_silently=False
+    # )
+    otp = str(random.randint(100000, 999999))
+
+    EmailOTP.objects.update_or_create(
+    email=email,
+    defaults={"otp": otp}
     )
 
     return Response({
-        "msg": "OTP sent"
+       "msg": "OTP generated",
     })
 
 @api_view(['POST'])
