@@ -1845,9 +1845,10 @@ def delete_notification(request, notification_id):
             status=500
         )
 
+from django.conf import settings
 from django.core.mail import send_mail
-from .models import EmailOTP
 import random
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -1869,7 +1870,8 @@ def send_registration_otp(request):
         defaults={"otp": otp}
     )
 
-    # SEND EMAIL
+    print("OTP GENERATED:", otp)
+
     try:
         send_mail(
             subject="Your College Grievance OTP",
@@ -1889,7 +1891,7 @@ def send_registration_otp(request):
             "error": "Failed to send OTP email",
             "details": str(e)
         }, status=500)
-
+    
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def verify_otp_and_register(request):
