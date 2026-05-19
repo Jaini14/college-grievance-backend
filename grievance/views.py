@@ -1873,26 +1873,12 @@ def send_registration_otp(request):
 
     print("OTP GENERATED:", otp)
 
-    try:
-        send_mail(
-            subject="Your College Grievance OTP",
-            message=f"Your OTP is: {otp}",
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[email],
-            fail_silently=False,
-        )
-
-        return Response({
-            "msg": "OTP sent successfully"
-        })
-
-    except Exception as e:
-        print("EMAIL ERROR:", str(e))
-        return Response({
-            "error": "Failed to send OTP email",
-            "details": str(e)
-        }, status=500)
+    return Response({
+      "msg": "OTP generated successfully",
+      "otp": otp
+    })
     
+   
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def verify_otp_and_register(request):
