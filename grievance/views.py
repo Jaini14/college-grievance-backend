@@ -1871,55 +1871,11 @@ def send_registration_otp(request):
     )
 
     print("OTP GENERATED:", otp)
-    print("EMAIL USER:", settings.EMAIL_HOST_USER)
-    print("EMAIL PASSWORD EXISTS:", bool(settings.EMAIL_HOST_PASSWORD))
 
-    # Try sending email
-    try:
-        send_mail(
-            subject="Your College Grievance OTP",
-            message=f"Your OTP is: {otp}",
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[email],
-            fail_silently=False,
-        )
-        print("EMAIL SENT SUCCESS")
-
-    except Exception as e:
-        print("EMAIL ERROR:", str(e))
-
-    # ALWAYS return success
     return Response({
-        "msg": "OTP generated successfully",
-        "otp": otp   # keep for testing
+      "msg": "OTP generated successfully",
+      "otp": otp
     })
-
-# @api_view(['POST'])
-# @permission_classes([AllowAny])
-# def send_registration_otp(request):
-
-#     email = request.data.get("email")
-
-#     if not email:
-#         return Response({"error": "Email required"}, status=400)
-
-#     if User.objects.filter(email=email).exists():
-#         return Response({"error": "Email already registered"}, status=400)
-
-#     otp = str(random.randint(100000, 999999))
-
-#     # Save OTP
-#     EmailOTP.objects.update_or_create(
-#         email=email,
-#         defaults={"otp": otp}
-#     )
-
-#     print("OTP GENERATED:", otp)
-
-#     return Response({
-#       "msg": "OTP generated successfully",
-#       "otp": otp
-#     })
     
    
 @api_view(['POST'])
