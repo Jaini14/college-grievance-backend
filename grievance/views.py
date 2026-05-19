@@ -1853,6 +1853,7 @@ from .models import EmailOTP
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def send_registration_otp(request):
+
     email = request.data.get("email")
 
     if not email:
@@ -1870,12 +1871,11 @@ def send_registration_otp(request):
     )
 
     print("OTP GENERATED:", otp)
+    print("EMAIL USER:", settings.EMAIL_HOST_USER)
+    print("EMAIL PASSWORD EXISTS:", bool(settings.EMAIL_HOST_PASSWORD))
 
-    # Try email, but don't break app if email fails
+    # Try sending email
     try:
-        print("EMAIL USER:", settings.EMAIL_HOST_USER)
-        print("EMAIL PASSWORD EXISTS:", bool(settings.EMAIL_HOST_PASSWORD))
-
         send_mail(
             subject="Your College Grievance OTP",
             message=f"Your OTP is: {otp}",
@@ -1883,13 +1883,12 @@ def send_registration_otp(request):
             recipient_list=[email],
             fail_silently=False,
         )
-
         print("EMAIL SENT SUCCESS")
 
     except Exception as e:
         print("EMAIL ERROR:", str(e))
 
-    # Always return success so frontend keeps working
+    # ALWAYS return success
     return Response({
         "msg": "OTP generated successfully",
         "otp": otp   # keep for testing
