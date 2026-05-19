@@ -1856,37 +1856,40 @@ def send_registration_otp(request):
     email = request.data.get("email")
 
     if not email:
-        return Response({"error": "Email required"}, status=400)
+        return Response(
+            {"error": "Email required"},
+            status=400
+        )
 
+    # prevent duplicate account
     if User.objects.filter(email=email).exists():
-        return Response({"error": "Email already registered"}, status=400)
+        return Response(
+            {"error": "Email already registered"},
+            status=400
+        )
 
-    otp = str(random.randint(100000, 999999))
+    otp = str(
+        random.randint(100000, 999999)
+    )
 
     EmailOTP.objects.update_or_create(
         email=email,
-        defaults={"otp": otp}
+        defaults={
+            "otp": otp
+        }
     )
 
-    try:
-        send_mail(
-            "College Registration OTP",
-            f"Your OTP is: {otp}",
-            settings.EMAIL_HOST_USER,
-            [email],
-            fail_silently=False
-        )
-
-        print("EMAIL SENT OTP:", otp)
-
-    except Exception as e:
-        print("EMAIL ERROR:", e)
-        return Response({"error": "Email sending failed"}, status=500)
+    send_mail(
+        "College Registration OTP",
+        f"Your OTP is: {otp}",
+        settings.EMAIL_HOST_USER,
+        [email],
+        fail_silently=False
+    )
 
     return Response({
-        "msg": "OTP sent successfully"
+        "msg": "OTP sent"
     })
-
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -1895,119 +1898,37 @@ def verify_otp_and_register(request):
     email = request.data.get("email")
     otp = request.data.get("otp")
 
-    if not email or not otp:
-        return Response({"error": "Email and OTP required"}, status=400)
-
-    otp_obj = EmailOTP.objects.filter(email=email, otp=otp).first()
+    otp_obj = EmailOTP.objects.filter(
+        email=email,
+        otp=otp
+    ).first()
 
     if not otp_obj:
-        return Response({"error": "Invalid OTP"}, status=400)
+        return Response(
+            {"error": "Invalid OTP"},
+            status=400
+        )
 
     if not otp_obj.is_valid():
-        return Response({"error": "OTP expired"}, status=400)
+        return Response(
+            {"error": "OTP expired"},
+            status=400
+        )
 
-    serializer = RegisterSerializer(data=request.data)
+    serializer = RegisterSerializer(
+        data=request.data
+    )
 
     if serializer.is_valid():
         serializer.save()
+
         otp_obj.delete()
 
-        return Response({"msg": "Registration successful"})
+        return Response({
+            "msg": "Registration successful"
+        })
 
-    return Response(serializer.errors, status=400)
-
-
-
-
-
-
-
-# @api_view(['POST'])
-# @permission_classes([AllowAny])
-# def send_registration_otp(request):
-
-#     email = request.data.get("email")
-
-#     if not email:
-#         return Response(
-#             {"error": "Email required"},
-#             status=400
-#         )
-
-#     # prevent duplicate account
-#     if User.objects.filter(email=email).exists():
-#         return Response(
-#             {"error": "Email already registered"},
-#             status=400
-#         )
-
-#     otp = str(
-#         random.randint(100000, 999999)
-#     )
-
-#     EmailOTP.objects.update_or_create(
-#         email=email,
-#         defaults={
-#             "otp": otp
-#         }
-#     )
-
-#     # send_mail(
-#     #     "College Registration OTP",
-#     #     f"Your OTP is: {otp}",
-#     #     settings.EMAIL_HOST_USER,
-#     #     [email],
-#     #     fail_silently=False
-#     # )
-#     otp = str(random.randint(100000, 999999))
-
-#     EmailOTP.objects.update_or_create(
-#     email=email,
-#     defaults={"otp": otp}
-#     )
-
-#     return Response({
-#        "msg": "OTP generated",
-#     })
-
-# @api_view(['POST'])
-# @permission_classes([AllowAny])
-# def verify_otp_and_register(request):
-
-#     email = request.data.get("email")
-#     otp = request.data.get("otp")
-
-#     otp_obj = EmailOTP.objects.filter(
-#         email=email,
-#         otp=otp
-#     ).first()
-
-#     if not otp_obj:
-#         return Response(
-#             {"error": "Invalid OTP"},
-#             status=400
-#         )
-
-#     if not otp_obj.is_valid():
-#         return Response(
-#             {"error": "OTP expired"},
-#             status=400
-#         )
-
-#     serializer = RegisterSerializer(
-#         data=request.data
-#     )
-
-#     if serializer.is_valid():
-#         serializer.save()
-
-#         otp_obj.delete()
-
-#         return Response({
-#             "msg": "Registration successful"
-#         })
-
-#     return Response(
-#         serializer.errors,
-#         status=400
-#     )
+    return Response(
+        serializer.errors,
+        status=400
+    )
