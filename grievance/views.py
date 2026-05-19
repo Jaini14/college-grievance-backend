@@ -1849,6 +1849,8 @@ import random
 from django.core.mail import send_mail
 from .models import EmailOTP
 
+import traceback
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def send_registration_otp(request):
@@ -1856,40 +1858,78 @@ def send_registration_otp(request):
     email = request.data.get("email")
 
     if not email:
-        return Response(
-            {"error": "Email required"},
-            status=400
-        )
+        return Response({"error": "Email required"}, status=400)
 
-    # prevent duplicate account
     if User.objects.filter(email=email).exists():
-        return Response(
-            {"error": "Email already registered"},
-            status=400
-        )
+        return Response({"error": "Email already registered"}, status=400)
 
-    otp = str(
-        random.randint(100000, 999999)
-    )
+    otp = str(random.randint(100000, 999999))
 
     EmailOTP.objects.update_or_create(
         email=email,
-        defaults={
-            "otp": otp
-        }
+        defaults={"otp": otp}
     )
 
-    send_mail(
-        "College Registration OTP",
-        f"Your OTP is: {otp}",
-        settings.EMAIL_HOST_USER,
-        [email],
-        fail_silently=False
-    )
+    try:
+        send_mail(
+            "College Registration OTP",
+            f"Your OTP is: {otp}",
+            settings.EMAIL_HOST_USER,
+            [email],
+            fail_silently=False
+        )
 
-    return Response({
-        "msg": "OTP sent"
-    })
+    except Exception as e:
+        print("EMAIL ERROR:", e)
+        print(traceback.format_exc())
+        return Response(
+            {"error": str(e)},
+            status=500
+        )
+
+    return Response({"msg": "OTP sent"})
+
+# @api_view(['POST'])
+# @permission_classes([AllowAny])
+# def send_registration_otp(request):
+
+#     email = request.data.get("email")
+
+#     if not email:
+#         return Response(
+#             {"error": "Email required"},
+#             status=400
+#         )
+
+#     # prevent duplicate account
+#     if User.objects.filter(email=email).exists():
+#         return Response(
+#             {"error": "Email already registered"},
+#             status=400
+#         )
+
+#     otp = str(
+#         random.randint(100000, 999999)
+#     )
+
+#     EmailOTP.objects.update_or_create(
+#         email=email,
+#         defaults={
+#             "otp": otp
+#         }
+#     )
+
+#     send_mail(
+#         "College Registration OTP",
+#         f"Your OTP is: {otp}",
+#         settings.EMAIL_HOST_USER,
+#         [email],
+#         fail_silently=False
+#     )
+
+#     return Response({
+#         "msg": "OTP sent"
+#     })
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
