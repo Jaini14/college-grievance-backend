@@ -1848,6 +1848,7 @@ def delete_notification(request, notification_id):
 from django.conf import settings
 from django.core.mail import send_mail
 import random
+from .models import EmailOTP
 
 
 @api_view(['POST'])
