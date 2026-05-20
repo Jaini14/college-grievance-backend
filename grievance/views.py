@@ -1845,10 +1845,10 @@ def delete_notification(request, notification_id):
             status=500
         )
 
-from django.conf import settings
+
 from django.core.mail import send_mail
+from django.conf import settings
 import random
-from .models import EmailOTP
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -1870,14 +1870,52 @@ def send_registration_otp(request):
         defaults={"otp": otp}
     )
 
-    print("OTP GENERATED:", otp)
+    # SEND EMAIL
+    send_mail(
+        subject="Your OTP for Grievance Portal Registration",
+        message=f"Your OTP is: {otp}",
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[email],
+        fail_silently=False,
+    )
 
     return Response({
-      "msg": "OTP generated successfully",
-      "otp": otp
+        "msg": "OTP sent successfully"
     })
+
+
+# from django.conf import settings
+# from django.core.mail import send_mail
+# import random
+# from .models import EmailOTP
+
+# @api_view(['POST'])
+# @permission_classes([AllowAny])
+# def send_registration_otp(request):
+
+#     email = request.data.get("email")
+
+#     if not email:
+#         return Response({"error": "Email required"}, status=400)
+
+#     if User.objects.filter(email=email).exists():
+#         return Response({"error": "Email already registered"}, status=400)
+
+#     otp = str(random.randint(100000, 999999))
+
+#     # Save OTP
+#     EmailOTP.objects.update_or_create(
+#         email=email,
+#         defaults={"otp": otp}
+#     )
+
+#     print("OTP GENERATED:", otp)
+
+#     return Response({
+#       "msg": "OTP generated successfully",
+#       "otp": otp
+#     })
     
-   
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def verify_otp_and_register(request):
